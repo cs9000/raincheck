@@ -208,7 +208,7 @@
     <div class="container">
         <h1>Rain Check</h1>
         <div class="zip-input">
-            <input type="text" id="zipCode" placeholder="Enter ZIP Code" maxlength="5">
+            <input type="text" id="zipCode" placeholder="ZIP Code" maxlength="5">
             <button onclick="fetchWeather()">Get Forecast</button>
         </div>
         <div class="recent-zips" id="recentZips"></div>
@@ -225,6 +225,15 @@
             recentZips: []
         };
 
+        // Migrate old recentZips format (array of strings) to new format (array of objects)
+        if (cachedData.recentZips.length > 0 && typeof cachedData.recentZips[0] === 'string') {
+            const now = Date.now();
+            cachedData.recentZips = cachedData.recentZips.map((zip, index) => ({
+                zip,
+                addedAt: now - (cachedData.recentZips.length - index) * 1000 // Spread timestamps
+            }));
+        }
+
         // Update title and h1 with city
         function updateTitle(city) {
             const titleText = city ? `Rain Check - ${city}` : 'Rain Check';
@@ -235,8 +244,10 @@
         // Update recent ZIPs UI
         function updateRecentZips() {
             const recentZipsDiv = document.getElementById('recentZips');
-            // Sort ZIPs numerically before rendering
-            const sortedZips = cachedData.recentZips.slice().sort((a, b) => parseInt(a) - parseInt(b));
+            // Sort ZIPs numerically by zip value for display
+            const sortedZips = cachedData.recentZips
+                .map(item => item.zip)
+                .sort((a, b) => parseInt(a) - parseInt(b));
             recentZipsDiv.innerHTML = 'Recent ZIPs: ' + sortedZips
                 .map(zip => `<a href="#" onclick="useRecentZip('${zip}')">${zip}</a>`)
                 .join(' | ');
@@ -292,16 +303,12 @@
                 cachedData.lon = lon;
                 cachedData.city = city;
                 // Update recent ZIPs (max 3, no duplicates)
-                const index = cachedData.recentZips.indexOf(zipInput);
-                if (index !== -1) {
-                    // ZIP already exists, remove it
-                    cachedData.recentZips.splice(index, 1);
-                }
-                cachedData.recentZips.push(zipInput); // Add to end before sorting
-                // Sort ZIPs numerically
-                cachedData.recentZips.sort((a, b) => parseInt(a) - parseInt(b));
+                cachedData.recentZips = cachedData.recentZips.filter(item => item.zip !== zipInput);
+                cachedData.recentZips.push({ zip: zipInput, addedAt: Date.now() });
                 if (cachedData.recentZips.length > 3) {
-                    cachedData.recentZips.pop();
+                    // Keep only the 3 most recent ZIPs
+                    cachedData.recentZips.sort((a, b) => b.addedAt - a.addedAt); // Sort descending by addedAt
+                    cachedData.recentZips = cachedData.recentZips.slice(0, 3); // Keep top 3
                 }
                 saveData();
             } else if (cachedData.lat && cachedData.lon) {
