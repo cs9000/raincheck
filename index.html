@@ -152,8 +152,11 @@
             display: none;
             margin-top: 10px;
             padding: 10px;
-            background: #E8E3F2; /* Pale lavender */
+            background: #FDF6E3; /* Soft cream, matching forecast-block */
             border-radius: 8px;
+        }
+        .forecast-block.rain .hourly-forecast {
+            background: #A3BFFA; /* Soft blue-gray for rainy blocks */
         }
         .hourly-forecast.show {
             display: block;
@@ -174,6 +177,17 @@
             width: 30px;
             height: 30px;
             margin-right: 10px;
+        }
+        .data-retrieved {
+            display: none;
+            text-align: center;
+            font-size: 12px;
+            color: #2E2E2E;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .data-retrieved.show {
+            display: block;
         }
         @media (max-width: 600px) {
             .container {
@@ -199,6 +213,7 @@
         </div>
         <div class="recent-zips" id="recentZips"></div>
         <div class="forecast" id="forecast"></div>
+        <div class="data-retrieved" id="dataRetrieved"></div>
     </div>
     <script>
         // Load cached data
@@ -220,7 +235,9 @@
         // Update recent ZIPs UI
         function updateRecentZips() {
             const recentZipsDiv = document.getElementById('recentZips');
-            recentZipsDiv.innerHTML = 'Recent ZIPs: ' + cachedData.recentZips
+            // Sort ZIPs numerically before rendering
+            const sortedZips = cachedData.recentZips.slice().sort((a, b) => parseInt(a) - parseInt(b));
+            recentZipsDiv.innerHTML = 'Recent ZIPs: ' + sortedZips
                 .map(zip => `<a href="#" onclick="useRecentZip('${zip}')">${zip}</a>`)
                 .join(' | ');
         }
@@ -277,10 +294,12 @@
                 // Update recent ZIPs (max 3, no duplicates)
                 const index = cachedData.recentZips.indexOf(zipInput);
                 if (index !== -1) {
-                    // ZIP already exists, move to front
+                    // ZIP already exists, remove it
                     cachedData.recentZips.splice(index, 1);
                 }
-                cachedData.recentZips.unshift(zipInput);
+                cachedData.recentZips.push(zipInput); // Add to end before sorting
+                // Sort ZIPs numerically
+                cachedData.recentZips.sort((a, b) => parseInt(a) - parseInt(b));
                 if (cachedData.recentZips.length > 3) {
                     cachedData.recentZips.pop();
                 }
@@ -304,6 +323,11 @@
                 const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,weathercode&timezone=auto&forecast_days=2`);
                 const data = await response.json();
                 displayForecast(data);
+                // Show data retrieval time
+                const retrievedDiv = document.getElementById('dataRetrieved');
+                const now = new Date();
+                retrievedDiv.textContent = `Data retrieved at ${now.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' })}`;
+                retrievedDiv.classList.add('show');
             } catch (error) {
                 alert('Error fetching weather: ' + error.message);
             }
@@ -332,8 +356,8 @@
             const forecastDiv = document.getElementById('forecast');
             forecastDiv.innerHTML = '';
 
-            // Get current date and time (May 13, 2025, 21:13 EDT)
-            const now = new Date('2025-05-13T21:13:00-04:00');
+            // Get current date and time dynamically
+            const now = new Date();
             const today = new Date(now);
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
