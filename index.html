@@ -236,9 +236,8 @@
 
         // Update title and h1 with city
         function updateTitle(city) {
-            const titleText = city ? `Rain Check - ${city}` : 'Rain Check';
-            document.title = titleText;
-            document.querySelector('h1').textContent = titleText;
+            document.title = 'Rain Check';
+            document.querySelector('h1').textContent = city ? `Rain Check - ${city}` : 'Rain Check';
         }
 
         // Update recent ZIPs UI
@@ -466,7 +465,7 @@
                     hourlyItem.innerHTML = `
                         <span class="weather-icon">${getWeatherIcon(weatherCode)}</span>
                         ${time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}: 
-                        ${isRain ? `${precipInches.toFixed(2)} in` : 'No rain'}
+                        ${isRain ? `${precipInches.toFixed(2)} in` : ''}
                     `;
                     hourlyDiv.appendChild(hourlyItem);
                 });
