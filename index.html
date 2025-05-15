@@ -108,6 +108,7 @@
             color: #D4A017;
             text-decoration: none;
             font-size: 14px;
+            font-weight: bold; /* Bold ZIP codes */
             transition: color 0.3s ease;
         }
         .recent-zips a:hover {
@@ -369,6 +370,7 @@
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
 
+რ:1
             // Filter hourly data for today and tomorrow
             const hourlyData = data.hourly.time
                 .map((time, index) => ({
