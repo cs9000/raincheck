@@ -55,7 +55,7 @@
         }
         body {
             font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #2C3E50 0%, #FF6F61 100%);
+            background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 50%, #4facfe 100%);
             color: #1A1A1A;
             min-height: 100vh;
             display: flex;
@@ -352,8 +352,8 @@
                     throw new Error('ZIP code not found');
                 }
             } catch (error) {
-                alert('Error finding ZIP code: ' + error.message);
                 console.error('Geocoding error:', error);
+                alert('Error finding ZIP code: ' + error.message);
                 return null;
             }
         }
@@ -362,27 +362,28 @@
             const zipInput = document.getElementById('zipCode').value.trim();
             let lat, lon, city;
 
-            if (zipInput) {
-                const result = await getLatLon(zipInput);
-                if (!result) return;
-                lat = result.lat;
-                lon = result.lon;
-                city = result.city;
-                cachedData.zipCode = zipInput;
-                cachedData.lat = lat;
-                cachedData.lon = lon;
-                cachedData.city = city;
-                cachedData.recentZips = cachedData.recentZips.filter(item => item.zip !== zipInput);
-                cachedData.recentZips.push({ zip: zipInput, addedAt: Date.now() });
-                if (cachedData.recentZips.length > 3) {
-                    cachedData.recentZips.sort((a, b) => b.addedAt - a.addedAt);
-                    cachedData.recentZips = cachedData.recentZips.slice(0, 3);
-                }
-                saveData();
-            } else {
+            if (!zipInput) {
                 alert('Please enter a ZIP code');
                 return;
             }
+
+            const result = await getLatLon(zipInput);
+            if (!result) return;
+            lat = result.lat;
+            lon = result.lon;
+            city = result.city;
+
+            cachedData.zipCode = zipInput;
+            cachedData.lat = lat;
+            cachedData.lon = lon;
+            cachedData.city = city;
+            cachedData.recentZips = cachedData.recentZips.filter(item => item.zip !== zipInput);
+            cachedData.recentZips.push({ zip: zipInput, addedAt: Date.now() });
+            if (cachedData.recentZips.length > 3) {
+                cachedData.recentZips.sort((a, b) => b.addedAt - a.addedAt);
+                cachedData.recentZips = cachedData.recentZips.slice(0, 3);
+            }
+            saveData();
 
             updateTitle(city);
 
@@ -399,8 +400,8 @@
                 retrievedDiv.textContent = `Data retrieved at ${now.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' })}`;
                 retrievedDiv.classList.add('show');
             } catch (error) {
-                alert('Error fetching weather: ' + error.message);
                 console.error('Weather fetch error:', error);
+                alert('Error fetching weather: ' + error.message);
             }
         }
 
@@ -437,7 +438,7 @@
             console.log('Processed hourlyData:', hourlyData.length, 'entries', hourlyData.slice(0, 5));
 
             const blocks = [
-                { label: 'late night / early morning', startHour: 0, endHour: 6 },
+                { label: 'over night', startHour: 0, endHour: 6 },
                 { label: 'morning', startHour: 6, endHour: 12 },
                 { label: 'afternoon', startHour: 12, endHour: 18 },
                 { label: 'evening', startHour: 18, endHour: 24 }
@@ -447,7 +448,7 @@
 
             [today, tomorrow].forEach((day, dayIndex) => {
                 const dayStr = day.toLocaleDateString('en-US', { weekday: 'long' });
-                blocks.forEach((block, blockIdx) => {
+                blocks.forEach(block => {
                     if (dayIndex === 0 && now.getHours() >= block.endHour) {
                         return;
                     }
@@ -473,11 +474,11 @@
                     const currentBlockIndex = blockIndex;
                     blockDiv.innerHTML = `
                         <h3>${dayStr} ${block.label}</h3>
-                        <p><span class="weather-icon">${getWeatherIcon(weatherCode)}</span> ${isRain ? `Rain: ${totalPrecipInches.toFixed(2)} in` : 'No rain expected'}</p>
+                        <p><span class="weather-icon">${getWeatherIcon(weatherCode)}</span> ${isRain ? `${totalPrecipInches.toFixed(2)} in` : 'No rain'}</p>
                         <div class="hourly-forecast" id="hourly-${currentBlockIndex}"></div>
                     `;
                     blockDiv.addEventListener('click', () => {
-                        console.log(`Clicked block ${currentBlockIndex}`);
+                        console.log(`Toggling for block ${currentBlockIndex}`);
                         toggleHourly(currentBlockIndex, blockData);
                     });
                     forecastDiv.appendChild(blockDiv);
@@ -487,7 +488,6 @@
         }
 
         function toggleHourly(blockIndex, blockData) {
-            console.log(`Toggling hourly for block ${blockIndex}`, blockData);
             const hourlyDiv = document.getElementById(`hourly-${blockIndex}`);
             if (!hourlyDiv) {
                 console.error(`Hourly div for block ${blockIndex} not found`);
@@ -516,7 +516,7 @@
                     hourlyItem.innerHTML = `
                         <span class="weather-icon">${getWeatherIcon(weatherCode)}</span>
                         ${time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })}: 
-                        ${isRain ? `${precipInches.toFixed(2)} in` : ''}
+                        ${isRain ? `${precipInches.toFixed(2)} in` : 'No rain'}
                     `;
                     hourlyDiv.appendChild(hourlyItem);
                 });
@@ -524,12 +524,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM loaded, attaching Enter key listener');
+            console.log('DOM loaded, attaching listeners');
             updateRecentZips();
             if (cachedData.zipCode && cachedData.city) {
-                document.getElementById('zipCode').value = cachedData.zipCode;
+                document.getElementById('zipCode').value = '';
                 updateTitle(cachedData.city);
-                fetchWeather();
             } else {
                 updateTitle(null);
             }
@@ -538,12 +537,12 @@
             if (zipInput) {
                 zipInput.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter') {
-                        console.log('Enter key pressed in ZIP code input');
+                        console.log('Enter key pressed');
                         fetchWeather();
                     }
                 });
             } else {
-                console.error('ZIP code input element not found');
+                console.error('ZIP input not found');
             }
         });
     </script>
