@@ -46,16 +46,16 @@
     <style>
         * {
             box-sizing: border-box;
-        }
-        html, body {
             margin: 0;
             padding: 0;
+        }
+        html, body {
             width: 100%;
             overflow-x: hidden;
         }
         body {
             font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #2C3E50 0%, #6A1B9A 50%, #FF6F61 100%);
+            background: linear-gradient(135deg, #2C3E50 0%, #FF6F61 100%);
             color: #1A1A1A;
             min-height: 100vh;
             display: flex;
@@ -64,21 +64,20 @@
             padding-right: env(safe-area-inset-right);
         }
         .container {
-            width: 520px;
-            margin: 20px auto;
-            padding: 20px;
+            width: 320px;
+            margin: 10px auto 0;
+            padding: 10px;
             background: rgba(255, 248, 231, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
             border: 2px solid #FFD700;
+            border-radius: 8px;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         h1 {
             text-align: center;
             color: #1A1A1A;
-            font-size: 30px;
+            font-size: 24px;
             font-weight: normal;
-            letter-spacing: 1px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
         .zip-input {
             display: flex;
@@ -88,38 +87,29 @@
             overflow-x: hidden;
         }
         .zip-input input {
-            padding: 10px;
-            font-size: 16px;
+            padding: 8px;
+            font-size: 14px;
             border: 1px solid #FFD700;
-            border-radius: 5px 0 0 5px;
-            width: 150px;
+            border-radius: 4px 0 0 4px;
+            width: 120px;
             background: #FFFFFF;
             font-family: Arial, sans-serif;
         }
         .zip-input button {
-            padding: 10px;
-            font-size: 16px;
+            padding: 8px;
+            font-size: 14px;
             border: 1px solid #FFD700;
             border-left: none;
             background: #FFD700;
             color: #1A1A1A;
-            border-radius: 0 5px 5px 0;
+            border-radius: 0 4px 4px 0;
             cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease;
             font-family: Arial, sans-serif;
-        }
-        .zip-input button:hover {
-            background: #FFA500;
-            animation: pulse 0.5s ease-in-out;
-            transform: scale(1.03);
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
         }
         .recent-zips {
             text-align: center;
             margin: 2px 0 12px 0;
+            font-size: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -129,52 +119,30 @@
             margin: 0 2px;
             color: #1A3C6D;
             text-decoration: none;
-            font-size: 14px;
             font-weight: bold;
-            transition: color 0.3s ease;
-        }
-        .recent-zips a:hover {
-            color: #00CED1;
-            text-decoration: underline;
         }
         .forecast {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
+            gap: 10px;
+            max-width: 100%;
             overflow-x: hidden;
         }
         .forecast-block {
             background: #FFF9C4;
-            border-radius: 10px;
-            padding: 15px;
-            width: 480px;
-            min-width: 480px;
-            max-width: 480px;
-            margin: 0 auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            padding: 10px;
+            width: 280px;
+            max-width: 100%;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: fadeIn 0.5s ease-in;
-            box-sizing: border-box;
             overflow: hidden;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .forecast-block:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
         }
         .forecast-block.rain {
             background: #87CEEB;
         }
         .forecast-block h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 14px;
             color: #1A1A1A;
             font-weight: normal;
             white-space: nowrap;
@@ -182,8 +150,8 @@
             text-overflow: ellipsis;
         }
         .forecast-block p {
-            margin: 5px 0;
-            font-size: 14px;
+            margin: 4px 0;
+            font-size: 12px;
             color: #1A1A1A;
             white-space: nowrap;
             overflow: hidden;
@@ -191,10 +159,12 @@
         }
         .hourly-forecast {
             display: none;
-            margin-top: 10px;
-            padding: 10px;
+            margin-top: 8px;
+            padding: 8px;
             background: #FFF9C4;
-            border-radius: 8px;
+            border-radius: 4px;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         .forecast-block.rain .hourly-forecast {
             background: #87CEEB;
@@ -205,8 +175,8 @@
         .hourly-item {
             display: flex;
             align-items: center;
-            padding: 5px 0 5px 10px;
-            font-size: 15px;
+            padding: 4px 0 4px 8px;
+            font-size: 12px;
             color: #1A1A1A;
             white-space: nowrap;
             overflow: hidden;
@@ -214,22 +184,21 @@
             max-width: 90%;
         }
         .hourly-item.rain {
-            border-left: 3px solid #FFD700;
+            border-left: 2px solid #FFD700;
             background: rgba(135, 206, 235, 0.3);
-            color: #1A1A1A;
         }
         .weather-icon {
-            width: 34px;
-            height: 34px;
-            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
             flex-shrink: 0;
         }
         .data-retrieved {
             display: none;
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             color: #1A1A1A;
-            margin-top: 20px;
+            margin-top: 12px;
             font-family: Arial, sans-serif;
             white-space: normal;
             overflow: hidden;
@@ -238,47 +207,73 @@
         .data-retrieved.show {
             display: block;
         }
-        @media (max-width: 1023px) {
+        /* Tablet (601px–1023px) */
+        @media (min-width: 601px) {
             .container {
-                width: 100%;
-                max-width: 520px;
-            }
-            .forecast {
-                max-width: none;
+                width: 520px;
+                padding: 15px;
             }
             .forecast-block {
-                width: calc(100% - 40px);
-                min-width: 0;
-                max-width: calc(100% - 40px);
+                width: 480px;
+                padding: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                animation: fadeIn 0.5s ease-in;
+            }
+            h1 {
+                font-size: 28px;
+            }
+            .zip-input input, .zip-input button {
+                padding: 10px;
+                font-size: 16px;
+            }
+            .recent-zips, .forecast-block h3, .hourly-item {
+                font-size: 14px;
+            }
+            .forecast-block p, .data-retrieved {
+                font-size: 12px;
             }
         }
-        @media (max-width: 600px) {
+        /* Laptop (≥1024px) */
+        @media (min-width: 1024px) {
             .container {
-                width: 85%;
-                min-width: 300px;
-                max-width: 340px;
-                margin: 10px auto 0;
-                padding: 10px;
-                overflow-x: hidden;
-                box-shadow: none;
-            }
-            .zip-input input {
-                width: 120px;
+                width: 520px;
+                padding: 20px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
             }
             .forecast-block {
-                width: calc(100% - 20px);
-                min-width: 0;
-                max-width: calc(100% - 20px);
-                box-shadow: none;
-                animation: none;
+                width: 480px;
+                padding: 15px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
             }
             .forecast-block:hover {
-                transform: none;
-                box-shadow: none;
+                transform: translateY(-2px) scale(1.01);
+                box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
             }
             .zip-input button:hover {
-                transform: none;
+                background: #FFA500;
+                transform: scale(1.03);
             }
+            h1 {
+                font-size: 30px;
+            }
+            .zip-input input, .zip-input button {
+                padding: 10px;
+                font-size: 16px;
+            }
+            .recent-zips, .forecast-block h3, .hourly-item {
+                font-size: 14px;
+            }
+            .forecast-block p, .data-retrieved {
+                font-size: 14px;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
         }
     </style>
 </head>
@@ -294,7 +289,6 @@
         <div class="data-retrieved" id="dataRetrieved"></div>
     </div>
     <script>
-        // Load cached data
         let cachedData = JSON.parse(localStorage.getItem('weatherAppData')) || {
             zipCode: null,
             lat: null,
@@ -303,7 +297,6 @@
             recentZips: []
         };
 
-        // Migrate old recentZips format
         if (cachedData.recentZips.length > 0 && typeof cachedData.recentZips[0] === 'string') {
             const now = Date.now();
             cachedData.recentZips = cachedData.recentZips.map((zip, index) => ({
@@ -312,36 +305,31 @@
             }));
         }
 
-        // Update title and h1
         function updateTitle(city) {
             document.title = 'Rain Check';
             document.querySelector('h1').textContent = city ? `Rain Check - ${city}` : 'Rain Check';
         }
 
-        // Update recent ZIPs UI
         function updateRecentZips() {
             const recentZipsDiv = document.getElementById('recentZips');
             const sortedZips = cachedData.recentZips
                 .map(item => item.zip)
                 .sort((a, b) => parseInt(a) - parseInt(b));
-            recentZipsDiv.innerHTML = 'Recent ZIPs: ' + sortedZips
+            recentZipsDiv.innerHTML = sortedZips.length ? 'Recent ZIPs: ' + sortedZips
                 .map(zip => `<a href="#" onclick="useRecentZip('${zip}')">${zip}</a>`)
-                .join(' | ');
+                .join(' | ') : '';
         }
 
-        // Use a recent ZIP code
         function useRecentZip(zip) {
             document.getElementById('zipCode').value = zip;
             fetchWeather();
         }
 
-        // Save data to local storage
         function saveData() {
             localStorage.setItem('weatherAppData', JSON.stringify(cachedData));
             updateRecentZips();
         }
 
-        // Fetch lat/long and city from ZIP code
         async function getLatLon(zip) {
             try {
                 const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${zip}&count=1&language=en&format=json`);
@@ -364,7 +352,6 @@
             }
         }
 
-        // Fetch weather forecast
         async function fetchWeather() {
             const zipInput = document.getElementById('zipCode').value.trim();
             let lat, lon, city;
@@ -411,25 +398,15 @@
             }
         }
 
-        // Get weather icon based on WMO code
         function getWeatherIcon(code) {
             const icons = {
-                0: '☀️',
-                1: '🌤️',
-                2: '⛅',
-                3: '☁️',
-                51: '🌧️',
-                61: '🌧️',
-                63: '🌧️',
-                65: '🌧️',
-                80: '🌧️',
-                81: '🌧️',
-                82: '🌧️'
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                51: '🌧️', 61: '🌧️', 63: '🌧️', 65: '🌧️',
+                80: '🌧️', 81: '🌧️', 82: '🌧️'
             };
             return icons[code] || '🌤️';
         }
 
-        // Display forecast in 6-hour blocks
         function displayForecast(data) {
             const forecastDiv = document.getElementById('forecast');
             forecastDiv.innerHTML = '';
@@ -503,7 +480,6 @@
             });
         }
 
-        // Toggle hourly forecast
         function toggleHourly(blockIndex, blockData) {
             console.log(`Toggling hourly for block ${blockIndex}`, blockData);
             const hourlyDiv = document.getElementById(`hourly-${blockIndex}`);
@@ -541,7 +517,6 @@
             }
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded, attaching Enter key listener');
             updateRecentZips();
