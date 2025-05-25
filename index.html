@@ -84,6 +84,7 @@
             display: flex;
             justify-content: center;
             margin: 10px 0;
+            max-width: 100%;
             overflow-x: hidden;
         }
         .zip-input input {
@@ -122,9 +123,10 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
         }
         .recent-zips a {
-            margin: 0 3px;
+            margin: 0 2px;
             color: #1A3C6D;
             text-decoration: none;
             font-size: 14px;
@@ -168,7 +170,7 @@
             box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
         }
         .forecast-block.rain {
-            background: #87CEEB; /* Pale blue */
+            background: #87CEEB;
         }
         .forecast-block h3 {
             margin: 0;
@@ -195,7 +197,7 @@
             border-radius: 8px;
         }
         .forecast-block.rain .hourly-forecast {
-            background: #87CEEB; /* Pale blue */
+            background: #87CEEB;
         }
         .hourly-forecast.show {
             display: block;
@@ -209,11 +211,11 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100%;
+            max-width: 90%;
         }
         .hourly-item.rain {
             border-left: 3px solid #FFD700;
-            background: rgba(135, 206, 235, 0.3); /* Pale blue tint */
+            background: rgba(135, 206, 235, 0.3);
             color: #1A1A1A;
         }
         .weather-icon {
@@ -252,9 +254,9 @@
         }
         @media (max-width: 600px) {
             .container {
-                width: 82%;
+                width: 85%;
                 min-width: 300px;
-                max-width: 400px;
+                max-width: 340px;
                 margin: 10px auto 0;
                 padding: 10px;
                 overflow-x: hidden;
@@ -268,6 +270,7 @@
                 min-width: 0;
                 max-width: calc(100% - 20px);
                 box-shadow: none;
+                animation: none;
             }
             .forecast-block:hover {
                 transform: none;
@@ -366,7 +369,6 @@
             const zipInput = document.getElementById('zipCode').value.trim();
             let lat, lon, city;
 
-            // Force fresh geocoding for all ZIPs
             if (zipInput) {
                 const result = await getLatLon(zipInput);
                 if (!result) return;
@@ -395,7 +397,6 @@
                 const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,weathercode&timezone=auto&forecast_days=2`);
                 const data = await response.json();
                 console.log('Weather API response:', data);
-                // Validate API response
                 if (!data.hourly || !data.hourly.precipitation || !data.hourly.time) {
                     throw new Error('Invalid API response: Missing hourly precipitation or time data');
                 }
@@ -482,7 +483,7 @@
                     const totalPrecip = blockData.reduce((sum, item) => sum + item.precip, 0);
                     const totalPrecipInches = totalPrecip * 0.0393701;
                     const weatherCode = Math.max(...blockData.map(item => item.weatherCode));
-                    const isRain = totalPrecip > 0.01; // Small threshold to avoid trace amounts
+                    const isRain = totalPrecip > 0.01;
 
                     const blockDiv = document.createElement('div');
                     blockDiv.className = `forecast-block ${isRain ? 'rain' : ''}`;
@@ -505,7 +506,7 @@
         // Toggle hourly forecast
         function toggleHourly(blockIndex, blockData) {
             console.log(`Toggling hourly for block ${blockIndex}`, blockData);
-            const hourlyDiv = document.getId(`hourly-${blockIndex}`);
+            const hourlyDiv = document.getElementById(`hourly-${blockIndex}`);
             if (!hourlyDiv) {
                 console.error(`Hourly div for block ${blockIndex} not found`);
                 return;
