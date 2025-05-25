@@ -41,11 +41,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Rain Check</title>
     <style>
         * {
             box-sizing: border-box;
+        }
+        html {
+            margin: 0;
+            overflow-x: hidden;
         }
         body {
             font-family: 'Georgia', serif;
@@ -118,7 +122,7 @@
             text-overflow: ellipsis;
         }
         .recent-zips a {
-            margin: 0 10px;
+            margin: 0 5px;
             color: #1A3C6D;
             text-decoration: none;
             font-size: 14px;
@@ -136,6 +140,7 @@
             width: 100%;
             max-width: 480px;
             margin: 0 auto;
+            overflow-x: hidden;
         }
         .forecast-block {
             background: #FFF9C4;
@@ -244,12 +249,13 @@
         }
         @media (max-width: 600px) {
             .container {
-                width: 85%;
+                width: 80%;
                 min-width: 300px;
                 max-width: 400px;
-                margin: 5px auto;
+                margin: 0 auto;
                 padding: 10px;
                 overflow-x: hidden;
+                box-shadow: none;
             }
             .zip-input input {
                 width: 120px;
@@ -258,6 +264,14 @@
                 width: calc(100% - 20px);
                 min-width: 0;
                 max-width: calc(100% - 20px);
+                box-shadow: none;
+            }
+            .forecast-block:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .zip-input button:hover {
+                transform: none;
             }
         }
     </style>
