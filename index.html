@@ -236,16 +236,18 @@
         }
         @media (max-width: 600px) {
             .container {
-                margin: 10px;
-                padding: 15px;
+                width: 90%;
+                max-width: 400px;
+                margin: 5px auto;
+                padding: 10px;
             }
             .zip-input input {
                 width: 120px;
             }
             .forecast-block {
-                width: calc(100% - 30px);
+                width: calc(100% - 20px);
                 min-width: 0;
-                max-width: calc(100% - 30px);
+                max-width: calc(100% - 20px);
             }
         }
     </style>
@@ -371,10 +373,6 @@
                     throw new Error('Invalid API response: Missing hourly precipitation or time data');
                 }
                 displayForecast(data);
-                const totalPrecip = data.hourly.precipitation.reduce((sum, val) => sum + (Number(val) || 0), 0);
-                if (totalPrecip === 0 && zipInput === '04930') {
-                    alert('No rain detected for 04930. This may be due to forecast inaccuracies. Check AccuWeather or NOAA for comparison: https://www.accuweather.com');
-                }
                 const retrievedDiv = document.getElementById('dataRetrieved');
                 const now = new Date();
                 retrievedDiv.textContent = `Data retrieved at ${now.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' })}`;
