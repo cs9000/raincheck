@@ -47,20 +47,21 @@
         * {
             box-sizing: border-box;
         }
-        html {
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
             overflow-x: hidden;
         }
         body {
             font-family: 'Georgia', serif;
-            margin: 0;
-            padding: 0;
             background: linear-gradient(135deg, #2C3E50 0%, #6A1B9A 50%, #FF6F61 100%);
             color: #1A1A1A;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow-x: hidden;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
         .container {
             width: 520px;
@@ -83,6 +84,7 @@
             display: flex;
             justify-content: center;
             margin: 10px 0;
+            overflow-x: hidden;
         }
         .zip-input input {
             padding: 10px;
@@ -122,7 +124,7 @@
             text-overflow: ellipsis;
         }
         .recent-zips a {
-            margin: 0 5px;
+            margin: 0 3px;
             color: #1A3C6D;
             text-decoration: none;
             font-size: 14px;
@@ -207,6 +209,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 100%;
         }
         .hourly-item.rain {
             border-left: 3px solid #FFD700;
@@ -249,10 +252,10 @@
         }
         @media (max-width: 600px) {
             .container {
-                width: 80%;
+                width: 82%;
                 min-width: 300px;
                 max-width: 400px;
-                margin: 0 auto;
+                margin: 10px auto 0;
                 padding: 10px;
                 overflow-x: hidden;
                 box-shadow: none;
@@ -502,7 +505,7 @@
         // Toggle hourly forecast
         function toggleHourly(blockIndex, blockData) {
             console.log(`Toggling hourly for block ${blockIndex}`, blockData);
-            const hourlyDiv = document.getElementById(`hourly-${blockIndex}`);
+            const hourlyDiv = document.getId(`hourly-${blockIndex}`);
             if (!hourlyDiv) {
                 console.error(`Hourly div for block ${blockIndex} not found`);
                 return;
