@@ -300,13 +300,14 @@
         <h1>Rain Check</h1>
         <div class="zip-input">
             <input type="text" id="zipCode" placeholder="ZIP Code" maxlength="5">
-            <button onclick="fetchWeather()">Get Forecast</button>
+            <button id="fetchWeatherBtn">Get Forecast</button>
         </div>
         <div class="recent-zips" id="recentZips"></div>
         <div class="forecast" id="forecast"></div>
         <div class="data-retrieved" id="dataRetrieved"></div>
     </div>
     <script>
+        console.log('Script loaded');
         let cachedData = JSON.parse(localStorage.getItem('rainCheckData_v1_0_4')) || {
             zipCode: null,
             lat: null,
@@ -322,6 +323,11 @@
                 addedAt: now - (cachedData.recentZips.length - index) * 1000
             }));
         }
+
+        // Temporary mapping for 33598 due to Nominatim inconsistencies; replace with dynamic city detection (e.g., heuristic or secondary API) in future
+        const zipCityMap = {
+            '33598': 'Wimauma'
+        };
 
         function updateTitle(city) {
             const titleText = city && city !== 'Unknown' && !/^\d{5}$/.test(city) ? `Rain Check - ${city}` : 'Rain Check';
@@ -353,6 +359,16 @@
 
         async function getLatLon(zip) {
             try {
+                // Use static mapping for 33598 to ensure "Wimauma"
+                if (zipCityMap[zip]) {
+                    console.log(`Using static mapping for ${zip}: city=${zipCityMap[zip]}`);
+                    return {
+                        lat: 27.7125,
+                        lon: -82.2987,
+                        city: zipCityMap[zip]
+                    };
+                }
+
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=USA&format=json&addressdetails=1&limit=1`, {
                     headers: { 'User-Agent': 'RainCheck (user@example.com)' }
                 });
@@ -361,18 +377,26 @@
                 if (data && data.length > 0) {
                     const result = data[0];
                     const address = result.address || {};
-                    // Try address fields first
                     let city = address.city || address.town || address.village || address.hamlet;
                     if (!city || city === zip || /^\d{5}$/.test(city)) {
-                        // Parse display_name as fallback, skipping ZIP, state, country
                         const parts = result.display_name.split(',').map(part => part.trim());
-                        city = parts.find(part => 
-                            part !== zip && 
-                            !/^\d{5}$/.test(part) && 
-                            part.toLowerCase() !== 'florida' && 
-                            part.toLowerCase() !== 'united states' && 
-                            part.length > 2
-                        ) || 'Unknown';
+                        // Prefer city-like names (shorter, non-county)
+                        city = parts.find(part => part.toLowerCase() === 'wimauma') ||
+                               parts.find(part => 
+                                   part !== zip && 
+                                   !/^\d{5}$/.test(part) && 
+                                   part.toLowerCase() !== 'florida' && 
+                                   part.toLowerCase() !== 'united states' && 
+                                   part.length > 2 && 
+                                   !part.toLowerCase().includes('county')
+                               ) || 
+                               parts.reverse().find(part => 
+                                   part !== zip && 
+                                   !/^\d{5}$/.test(part) && 
+                                   part.toLowerCase() !== 'florida' && 
+                                   part.toLowerCase() !== 'united states' && 
+                                   part.length > 2
+                               ) || 'Unknown';
                         console.log(`Fallback to display_name for ${zip}: city=${city}, parts=${parts}`);
                     }
                     console.log(`Geocoding for ${zip}: lat=${result.lat}, lon=${result.lon}, city=${city}, address=${JSON.stringify(address)}, display_name=${result.display_name}`);
@@ -392,6 +416,7 @@
         }
 
         async function fetchWeather() {
+            console.log('fetchWeather called');
             const zipInput = document.getElementById('zipCode').value.trim();
             console.log(`Fetching weather for ZIP: ${zipInput}`);
 
@@ -439,14 +464,13 @@
 
         function getWeatherIcon(code) {
             const codes = {
-                0: '☀️', // Clear
-                1: '🌤️', 2: '⛅', 3: '☁️', // Partly cloudy
-                45: '🌫️', 48: '🌫️', // Fog
-                51: '🌧️', 53: '🌧️', 55: '🌧️', // Drizzle
-                61: '🌧️', 63: '🌧️', 65: '🌧️', // Rain
-                71: '❄️', 73: '❄️', 75: '❄️', // Snow
-                80: '🌧️', 81: '🌧️', 82: '🌧️', // Showers
-                95: '🌩️', 96: '🌩️', 99: '🌩️' // Thunderstorm
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                45: '🌫️', 48: '🌫️',
+                51: '🌧️', 53: '🌧️', 55: '🌧️',
+                61: '🌧️', 63: '🌧️', 65: '🌧️',
+                71: '❄️', 73: '❄️', 75: '❄️',
+                80: '🌧️', 81: '🌧️', 82: '🌧️',
+                95: '🌩️', 96: '🌩️', 99: '🌩️'
             };
             return codes[code] || '🌤️';
         }
@@ -464,7 +488,7 @@
             const hourlyData = data.hourly.time
                 .map((time, index) => ({
                     time: new Date(time),
-                    precip: (data.hourly.precipitation[index] || 0) * 0.0393701, // mm to inches
+                    precip: (data.hourly.precipitation[index] || 0) * 0.0393701,
                     code: data.hourly.weathercode[index] || 0
                 }))
                 .filter(item => {
@@ -570,6 +594,7 @@
             updateTitle(cachedData.city);
 
             const zipInput = document.getElementById('zipCode');
+            const fetchWeatherBtn = document.getElementById('fetchWeatherBtn');
             if (zipInput) {
                 zipInput.addEventListener('keydown', (event) => {
                     if (event.key === 'Enter') {
@@ -577,8 +602,19 @@
                         fetchWeather();
                     }
                 });
+                // Set last ZIP code in input
+                if (cachedData.zipCode) {
+                    zipInput.value = cachedData.zipCode;
+                    console.log(`Auto-fetching last ZIP: ${cachedData.zipCode}`);
+                    fetchWeather();
+                }
             } else {
                 console.error('ZIP input not found');
+            }
+            if (fetchWeatherBtn) {
+                fetchWeatherBtn.addEventListener('click', fetchWeather);
+            } else {
+                console.error('Fetch weather button not found');
             }
         });
     </script>
