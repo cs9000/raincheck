@@ -76,7 +76,7 @@
         h1 {
             text-align: center;
             color: #1A1A1A;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: normal;
         }
         .zip-input {
@@ -142,7 +142,7 @@
         }
         .forecast-block h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 18px;
             color: #1A1A1A;
             font-weight: normal;
             white-space: nowrap;
@@ -151,7 +151,7 @@
         }
         .forecast-block p {
             margin: 4px 0;
-            font-size: 14px;
+            font-size: 16px;
             color: #1A1A1A;
             white-space: nowrap;
             overflow: hidden;
@@ -175,8 +175,8 @@
         .hourly-item {
             display: flex;
             align-items: center;
-            padding: 4px 0 4px 8px;
-            font-size: 14px;
+            padding: 6px 0 6px 10px;
+            font-size: 16px;
             color: #1A1A1A;
             white-space: nowrap;
             overflow: hidden;
@@ -219,17 +219,24 @@
                 animation: fadeIn 0.5s ease-in;
             }
             h1 {
-                font-size: 28px;
+                font-size: 32px;
             }
             .zip-input input, .zip-input button {
                 padding: 10px;
                 font-size: 16px;
             }
-            .recent-zips, .forecast-block h3, .hourly-item {
+            .recent-zips {
                 font-size: 16px;
             }
+            .forecast-block h3 {
+                font-size: 20px;
+            }
             .forecast-block p {
-                font-size: 14px;
+                font-size: 16px;
+            }
+            .hourly-item {
+                font-size: 18px;
+                padding: 6px 0 6px 10px;
             }
             .data-retrieved {
                 font-size: 12px;
@@ -255,17 +262,24 @@
                 transform: scale(1.03);
             }
             h1 {
-                font-size: 30px;
+                font-size: 34px;
             }
             .zip-input input, .zip-input button {
                 padding: 10px;
                 font-size: 16px;
             }
-            .recent-zips, .forecast-block h3, .hourly-item {
+            .recent-zips {
                 font-size: 16px;
             }
+            .forecast-block h3 {
+                font-size: 20px;
+            }
             .forecast-block p {
-                font-size: 14px;
+                font-size: 16px;
+            }
+            .hourly-item {
+                font-size: 18px;
+                padding: 6px 0 6px 10px;
             }
             .data-retrieved {
                 font-size: 12px;
@@ -310,8 +324,10 @@
         }
 
         function updateTitle(city) {
-            document.title = 'Rain Check';
-            document.querySelector('h1').textContent = city ? `Rain Check - ${city}` : 'Rain Check';
+            const titleText = city && city !== 'Unknown' ? `Rain Check - ${city}` : 'Rain Check';
+            console.log(`Updating title to: ${titleText}`);
+            document.title = titleText;
+            document.querySelector('h1').textContent = titleText;
         }
 
         function updateRecentZips() {
@@ -325,6 +341,7 @@
         }
 
         function useRecentZip(zip) {
+            console.log(`Using recent ZIP: ${zip}`);
             document.getElementById('zipCode').value = zip;
             fetchWeather();
         }
@@ -342,11 +359,12 @@
                 const data = await response.json();
                 if (data && data.length > 0) {
                     const result = data[0];
-                    console.log(`Geocoding for ${zip}: lat=${result.lat}, lon=${result.lon}, city=${result.display_name.split(',')[0]}`);
+                    const city = result.display_name.split(',')[0].trim() || 'Unknown';
+                    console.log(`Geocoding for ${zip}: lat=${result.lat}, lon=${result.lon}, city=${city}`);
                     return {
                         lat: parseFloat(result.lat),
                         lon: parseFloat(result.lon),
-                        city: result.display_name.split(',')[0] || 'Unknown'
+                        city: city
                     };
                 } else {
                     throw new Error('ZIP code not found');
@@ -360,7 +378,7 @@
 
         async function fetchWeather() {
             const zipInput = document.getElementById('zipCode').value.trim();
-            let lat, lon, city;
+            console.log(`Fetching weather for ZIP: ${zipInput}`);
 
             if (!zipInput) {
                 alert('Please enter a ZIP code');
@@ -369,9 +387,8 @@
 
             const coords = await getLatLon(zipInput);
             if (!coords) return;
-            lat = coords.lat;
-            lon = coords.lon;
-            city = coords.city;
+            const { lat, lon, city } = coords;
+            console.log(`Fetched city: ${city} for ZIP: ${zipInput}`);
 
             cachedData.zipCode = zipInput;
             cachedData.lat = lat;
@@ -528,13 +545,14 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded, attaching listeners');
-            updateRecentZips();
-            if (cachedData.zipCode && cachedData.city) {
-                document.getElementById('zipCode').value = '';
-                updateTitle(cachedData.city);
-            } else {
-                updateTitle(null);
+            // Reset city if it matches a ZIP code to clear stale data
+            if (cachedData.city && /^\d{5}$/.test(cachedData.city)) {
+                console.log(`Clearing stale city: ${cachedData.city}`);
+                cachedData.city = null;
+                localStorage.setItem('weatherAppData', JSON.stringify(cachedData));
             }
+            updateRecentZips();
+            updateTitle(cachedData.city);
 
             const zipInput = document.getElementById('zipCode');
             if (zipInput) {
