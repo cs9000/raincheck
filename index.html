@@ -307,7 +307,7 @@
         <div class="data-retrieved" id="dataRetrieved"></div>
     </div>
     <script>
-        let cachedData = JSON.parse(localStorage.getItem('weatherAppData')) || {
+        let cachedData = JSON.parse(localStorage.getItem('rainCheckData_v1_0_4')) || {
             zipCode: null,
             lat: null,
             lon: null,
@@ -324,7 +324,7 @@
         }
 
         function updateTitle(city) {
-            const titleText = city && city !== 'Unknown' ? `Rain Check - ${city}` : 'Rain Check';
+            const titleText = city && city !== 'Unknown' && !/^\d{5}$/.test(city) ? `Rain Check - ${city}` : 'Rain Check';
             console.log(`Updating title to: ${titleText}`);
             document.title = titleText;
             document.querySelector('h1').textContent = titleText;
@@ -347,20 +347,35 @@
         }
 
         function saveData() {
-            localStorage.setItem('weatherAppData', JSON.stringify(cachedData));
+            localStorage.setItem('rainCheckData_v1_0_4', JSON.stringify(cachedData));
             updateRecentZips();
         }
 
         async function getLatLon(zip) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=USA&format=json&limit=1`, {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=USA&format=json&addressdetails=1&limit=1`, {
                     headers: { 'User-Agent': 'RainCheck (user@example.com)' }
                 });
                 const data = await response.json();
+                console.log(`Nominatim response for ${zip}:`, JSON.stringify(data, null, 2));
                 if (data && data.length > 0) {
                     const result = data[0];
-                    const city = result.display_name.split(',')[0].trim() || 'Unknown';
-                    console.log(`Geocoding for ${zip}: lat=${result.lat}, lon=${result.lon}, city=${city}`);
+                    const address = result.address || {};
+                    // Try address fields first
+                    let city = address.city || address.town || address.village || address.hamlet;
+                    if (!city || city === zip || /^\d{5}$/.test(city)) {
+                        // Parse display_name as fallback, skipping ZIP, state, country
+                        const parts = result.display_name.split(',').map(part => part.trim());
+                        city = parts.find(part => 
+                            part !== zip && 
+                            !/^\d{5}$/.test(part) && 
+                            part.toLowerCase() !== 'florida' && 
+                            part.toLowerCase() !== 'united states' && 
+                            part.length > 2
+                        ) || 'Unknown';
+                        console.log(`Fallback to display_name for ${zip}: city=${city}, parts=${parts}`);
+                    }
+                    console.log(`Geocoding for ${zip}: lat=${result.lat}, lon=${result.lon}, city=${city}, address=${JSON.stringify(address)}, display_name=${result.display_name}`);
                     return {
                         lat: parseFloat(result.lat),
                         lon: parseFloat(result.lon),
@@ -472,6 +487,7 @@
                 const dayStr = day.toLocaleDateString('en-US', { weekday: 'long' });
                 blocks.forEach(block => {
                     if (dayIndex === 0 && now.getHours() >= block.endHour) {
+                        console.log(`Skipping ${dayStr} ${block.label} (past time)`);
                         return;
                     }
 
@@ -484,7 +500,12 @@
                                itemDate.getHours() < block.endHour;
                     });
 
-                    if (blockData.length === 0) return;
+                    console.log(`Block ${dayStr} ${block.label}: ${blockData.length} hours`);
+
+                    if (blockData.length === 0) {
+                        console.log(`No data for ${dayStr} ${block.label}`);
+                        return;
+                    }
 
                     const totalPrecip = blockData.reduce((sum, item) => sum + item.precip, 0);
                     const isRain = totalPrecip > 0.001;
@@ -545,12 +566,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded, attaching listeners');
-            // Reset city if it matches a ZIP code to clear stale data
-            if (cachedData.city && /^\d{5}$/.test(cachedData.city)) {
-                console.log(`Clearing stale city: ${cachedData.city}`);
-                cachedData.city = null;
-                localStorage.setItem('weatherAppData', JSON.stringify(cachedData));
-            }
             updateRecentZips();
             updateTitle(cachedData.city);
 
